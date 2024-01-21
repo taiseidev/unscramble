@@ -19,6 +19,8 @@ class GameViewModel : ViewModel() {
     var userGuess by mutableStateOf("")
         private set
 
+    val SCORE_INCREASE = 5;
+
     private lateinit var currentWord: String
     private var usedWords: MutableSet<String> = mutableSetOf()
 
@@ -51,11 +53,29 @@ class GameViewModel : ViewModel() {
 
     fun checkUserGuess() {
         if (userGuess.equals(currentWord, ignoreCase = true)) {
-
+            val updatedScore = uiState.value.score.plus(SCORE_INCREASE)
+            updateGameState(updatedScore)
         } else {
             _uiState.update { currentState ->
                 currentState.copy(isGuessedWordWrong = true)
             }
+        }
+        updateUserGuess("")
+    }
+
+    fun skipWord() {
+        updateGameState(uiState.value.score)
+        updateUserGuess("")
+    }
+
+    private fun updateGameState(updatedScore: Int) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                isGuessedWordWrong = false,
+                currentWordCount = currentState.currentWordCount.inc(),
+                currentScrambledWord = pickRandomWordAndShuffle(),
+                score = updatedScore
+            )
         }
     }
 
