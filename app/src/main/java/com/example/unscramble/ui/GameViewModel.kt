@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.example.unscramble.data.allWords
+import com.example.unscramble.data.SCORE_INCREASE
+import com.example.unscramble.data.MAX_NO_OF_WORDS
 import kotlinx.coroutines.flow.update
 
 
@@ -18,8 +20,6 @@ class GameViewModel : ViewModel() {
 
     var userGuess by mutableStateOf("")
         private set
-
-    val SCORE_INCREASE = 5;
 
     private lateinit var currentWord: String
     private var usedWords: MutableSet<String> = mutableSetOf()
@@ -69,13 +69,23 @@ class GameViewModel : ViewModel() {
     }
 
     private fun updateGameState(updatedScore: Int) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                isGuessedWordWrong = false,
-                currentWordCount = currentState.currentWordCount.inc(),
-                currentScrambledWord = pickRandomWordAndShuffle(),
-                score = updatedScore
-            )
+        if (usedWords.size == MAX_NO_OF_WORDS) {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    isGuessedWordWrong = false,
+                    score = updatedScore,
+                    isGameOver = true,
+                )
+            }
+        } else {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    isGuessedWordWrong = false,
+                    currentWordCount = currentState.currentWordCount.inc(),
+                    currentScrambledWord = pickRandomWordAndShuffle(),
+                    score = updatedScore
+                )
+            }
         }
     }
 
